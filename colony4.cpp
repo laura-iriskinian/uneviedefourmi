@@ -23,9 +23,9 @@ public:
 
 // Graph structure
 map<string, vector<string>> colony;
-map<string, string> roomOccupied;
+map<string, int> roomOccupancy;
 
-const int NUM_ANTS = 5;
+const int NUM_ANTS = 10;
 
 // Add bidirectional tunnel
 void addTunnel(const string& a, const string& b) {
@@ -62,10 +62,15 @@ vector<string> shortestPath(string start, string target) {
 
 int main() {
     // Build the colony layout
+    addTunnel("S3", "S4");
     addTunnel("Sv", "S1");
     addTunnel("S1", "S2");
-    addTunnel("S2", "Sd");
-    addTunnel("Sd", "Sv"); // Creates a possible shortcut
+    addTunnel("S2", "S4");
+    addTunnel("S4", "S5");
+    addTunnel("S5", "Sd");
+    addTunnel("S4", "S6");
+    addTunnel("S6", "Sd");
+    addTunnel("S1", "S3"); // dead end
 
     // Create ants
     vector<Ant> ants;
@@ -73,15 +78,26 @@ int main() {
         ants.push_back(Ant("f" + to_string(i)));
     }
 
-    // Only S1 and S2 can be occupied by one ant
-    roomOccupied["S1"] = "";
-    roomOccupied["S2"] = "";
+    // Define max occupancy per room
+    map<string, int> roomCapacity = {
+        {"S1", 2},  // S1 can hold 2 ants simultaneously
+        {"S4", 2},  // S4 can hold 2 ants simultaneously
+        {"S2", 1},  // Other rooms have a capacity of one ant max
+        {"S3", 1},
+        {"S5", 1},
+        {"S6", 1}
+    };
+
+    // Initialize room occupancy to 0
+    for (const auto& room : roomCapacity) {
+        roomOccupancy[room.first] = 0;
+    }
 
     int step = 1;
     bool allFinished = false;
 
     // Print the presentation lines
-    cout << "\nColony two\n" << endl;
+    cout << "\nColony four\n" << endl;
     cout << "Number of ants : "<< ants.size() << endl;
 
     while (!allFinished) {
@@ -91,8 +107,25 @@ int main() {
         vector<pair<int, string>> plannedMoves;
         set<string> reservedRooms;
         set<string> releasedRooms;
+        map<string, int> releasedAntsCount;
 
-        // Plan moves based on shortest paths
+        // First pass: count how many ants will leave each room
+        for (int i = 0; i < ants.size(); ++i) {
+            Ant& ant = ants[i];
+            if (ant.finished) continue;
+
+            string current = ant.position;
+            if (current != "Sv" && current != "Sd") {
+                // Try to get path to Sd
+                vector<string> path = shortestPath(current, "Sd");
+                if (path.size() >= 2) {
+                    // This ant might leave its current room
+                    releasedAntsCount[current]++;
+                }
+            }
+        }
+
+        // Second pass, plan moves based on shortest paths
         for (int i = 0; i < ants.size(); ++i) {
             Ant& ant = ants[i];
             if (ant.finished) continue;
@@ -109,18 +142,25 @@ int main() {
             if (next == "Sd") {
                 canMove = true;
             } else {
-                bool willBeFree = (roomOccupied[next] == "" || releasedRooms.count(next));
-                bool notReserved = reservedRooms.count(next) == 0;
+                // Check if there's space considering ants that will leave
+                int currentOccupancy = roomOccupancy[next];
+                int plannedOccupants = 0;
+                for (auto& plannedMove : plannedMoves) {
+                    if (ants[plannedMove.first].position != next && plannedMove.second == next) {
+                        plannedOccupants++;
+                    }
+                }
 
-                if (willBeFree && notReserved) {
+                int potentialReleases = releasedAntsCount[next];
+                bool hasSpace = (currentOccupancy - potentialReleases + plannedOccupants) < roomCapacity[next];
+
+                if (hasSpace) {
                     canMove = true;
                 }
             }
 
             if (canMove) {
                 plannedMoves.push_back({i, next});
-                if (next != "Sd") reservedRooms.insert(next);
-                if (current != "Sv" && current != "Sd") releasedRooms.insert(current);
                 anyMove = true;
             }
 
@@ -136,8 +176,8 @@ int main() {
                 string from = ants[idx].position;
                 string to = move.second;
 
-                if (from != "Sv" && from != "Sd") roomOccupied[from] = "";
-                if (to != "Sv" && to != "Sd") roomOccupied[to] = ants[idx].name;
+                if (from != "Sv" && from != "Sd") roomOccupancy[from]--;
+                if (to != "Sv" && to != "Sd") roomOccupancy[to]++;
 
                 ants[idx].position = to;
                 if (to == "Sd") ants[idx].finished = true;

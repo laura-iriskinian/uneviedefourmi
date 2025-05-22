@@ -60,6 +60,10 @@ int main() {
     int step = 1;
     bool allFinished = false;
 
+    // Print the presentation lines
+    cout << "\nColony one\n" << endl;
+    cout << "Number of ants : "<< ants.size() << endl;
+
     while (!allFinished) {
         allFinished = true;
         bool anyMove = false;
@@ -105,7 +109,7 @@ int main() {
 
         // Only print and apply moves if there are any
         if (anyMove) {
-            cout << "+++ Step " << step << " +++" << endl;
+            cout << "\n+++ Step " << step << " +++" << endl;
 
             for (auto& move : plannedMoves) {
                 int idx = move.first;
