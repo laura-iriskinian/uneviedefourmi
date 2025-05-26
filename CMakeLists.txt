@@ -10,3 +10,6 @@ add_executable(colony1 colony1.cpp)
 
 # Créer un exécutable pour colony2.cpp
 add_executable(colony2 colony2.cpp)
+
+# Créer un exécutable pour colony5.cpp
+add_executable(colony5 colony5.cpp)

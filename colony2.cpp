@@ -82,7 +82,7 @@ int main() {
 
     // Print the presentation lines
     cout << "\nColony two\n" << endl;
-    cout << "Number of ants : "<< ants.size() << endl;
+    cout << "Number of ants : "<< ants.size() << "\n" << endl;
 
     while (!allFinished) {
         allFinished = true;

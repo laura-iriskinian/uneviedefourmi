@@ -3,8 +3,6 @@
 #include <vector>
 #include <queue>
 #include <string>
-#include <set>
-#include <algorithm>
 
 using namespace std;
 
@@ -27,7 +25,7 @@ map<string, vector<string>> colony;
 map<string, int> roomOccupancy;
 map<string, int> roomCapacity;
 
-const int NUM_ANTS = 10;
+const int NUM_ANTS = 50;
 
 // Add bidirectional tunnel
 void addTunnel(const string& a, const string& b) {
@@ -154,25 +152,44 @@ void printAntPositions(const vector<Ant>& ants) {
 }
 
 int main() {
-    // Build the colony layout for colony 4
+    // Build the colony layout
     addTunnel("Sv", "S1");
     addTunnel("S1", "S2");
-    addTunnel("S2", "S4");
+    addTunnel("S2", "S3");
     addTunnel("S3", "S4");
-    addTunnel("S4", "S5");
-    addTunnel("S5", "Sd");
-    addTunnel("S4", "S6");
-    addTunnel("S6", "Sd");
-    addTunnel("S1", "S3");
+    addTunnel("S4", "Sd");
+    addTunnel("S2", "S5");
+    addTunnel("S5", "S4");
+    addTunnel("S13", "Sd");
+    addTunnel("S8", "S12");
+    addTunnel("S12", "S13");
+    addTunnel("S6", "S7");
+    addTunnel("S7", "S9");
+    addTunnel("S9", "S14");
+    addTunnel("S14", "Sd");
+    addTunnel("S7", "S10");
+    addTunnel("S10", "S14");
+    addTunnel("S1", "S6");
+    addTunnel("S6", "S8");
+    addTunnel("S8", "S11");
+    addTunnel("S11", "S13");
 
     // Define max occupancy per room
     roomCapacity = {
-        {"S1", 2},  // S1 { 2 }
-        {"S2", 1},  // S2 (default capacity 1)
-        {"S3", 1},  // S3 (default capacity 1)
-        {"S4", 2},  // S4 { 2 }
-        {"S5", 1},  // S5 (default capacity 1)
-        {"S6", 1},  // S6 (default capacity 1)
+        {"S1", 8},
+        {"S2", 4},
+        {"S3", 2},
+        {"S4", 4},
+        {"S5", 2},
+        {"S6", 4},
+        {"S7", 2},
+        {"S8", 5},
+        {"S9", 1},
+        {"S10", 1},
+        {"S11", 1},
+        {"S12", 1},
+        {"S13", 4},
+        {"S14", 2},
     };
 
     // Initialize room occupancy to 0
