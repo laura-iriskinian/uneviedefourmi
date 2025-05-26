@@ -10,22 +10,22 @@
 
 using namespace std;
 
-// Ant representation
 class Ant {
 public:
     string name;
-    string position;
+    vector<string> path; // chemin complet à suivre
+    int positionIndex;   // index dans le chemin
     bool finished;
 
-    Ant(string n) : name(n), position("Sv"), finished(false) {}
+    Ant(string n, const vector<string>& p) : name(n), path(p), positionIndex(0), finished(false) {}
 };
 
-map<string, vector<string>> colony;              // Graph: room -> connected rooms
-map<string, int> roomCapacity;                   // Room name -> capacity
-map<string, vector<string>> roomOccupants;       // Room name -> list of ant names
+map<string, vector<string>> colony;
+map<string, int> roomCapacity;
+map<string, vector<string>> roomOccupants;
 vector<Ant> ants;
 
-// Read configuration from input.txt
+// Lecture fichier
 bool readInput(const string& filename, int& numAnts) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -41,7 +41,7 @@ bool readInput(const string& filename, int& numAnts) {
         string name;
         int cap;
         file >> name >> cap;
-        if (cap == -1) cap = numeric_limits<int>::max(); // Infinite capacity
+        if (cap == -1) cap = numeric_limits<int>::max();
         roomCapacity[name] = cap;
         roomOccupants[name] = {};
     }
@@ -53,7 +53,6 @@ bool readInput(const string& filename, int& numAnts) {
         colony[a].push_back(b);
         colony[b].push_back(a);
 
-        // Ensure rooms exist in the maps even if not declared earlier
         if (!roomCapacity.count(a)) {
             roomCapacity[a] = 1;
             roomOccupants[a] = {};
@@ -63,75 +62,71 @@ bool readInput(const string& filename, int& numAnts) {
             roomOccupants[b] = {};
         }
     }
-
     file.close();
     return true;
 }
 
-// Breadth-first search to find the shortest path from start to target
-vector<string> shortestPath(const string& start, const string& target) {
+// BFS qui retourne tous les plus courts chemins entre start et end
+void findAllShortestPaths(const string& start, const string& end, vector<vector<string>>& allPaths) {
     queue<vector<string>> q;
-    set<string> visited;
     q.push({start});
-    visited.insert(start);
+
+    int shortestLength = -1;
+    set<string> visited;
+    vector<string> currentLevelVisited;
 
     while (!q.empty()) {
         vector<string> path = q.front();
         q.pop();
-        string last = path.back();
-        if (last == target) return path;
 
-        for (const string& neighbor : colony[last]) {
-            if (!visited.count(neighbor)) {
-                visited.insert(neighbor);
-                vector<string> newPath = path;
-                newPath.push_back(neighbor);
-                q.push(newPath);
+        if (shortestLength != -1 && (int)path.size() > shortestLength) break;
+
+        string last = path.back();
+        if (last == end) {
+            allPaths.push_back(path);
+            shortestLength = (int)path.size();
+        } else {
+            for (const string& neighbor : colony[last]) {
+                if (find(path.begin(), path.end(), neighbor) == path.end()) { // éviter cycle
+                    vector<string> newPath = path;
+                    newPath.push_back(neighbor);
+                    q.push(newPath);
+                }
             }
         }
     }
-    return {};
 }
 
-// Verify that Sd is reachable from Sv
-bool isReachable() {
-    if (!roomCapacity.count("Sv") || !roomCapacity.count("Sd")) {
-        cerr << "[ERROR] Room Sv or Sd is missing." << endl;
-        return false;
-    }
-
-    vector<string> path = shortestPath("Sv", "Sd");
-    if (path.empty()) return false;
-
-    // ✅ Show the path for debugging
-    cout << "[INFO] Path from Sv to Sd: ";
-    for (const string& r : path) cout << r << " ";
-    cout << endl;
-    return true;
-}
-
-// Check if room can be entered during this step
-bool canEnter(const string& room, const set<string>& willBeFreed, const map<string, vector<string>>& tempOccupants) {
+// Vérifie si on peut entrer dans une salle
+bool canEnter(const string& room, const map<string, int>& futureOccupantsCount) {
     if (room == "Sv" || room == "Sd") return true;
-    int current = tempOccupants.at(room).size();
-    int capacity = roomCapacity[room];
-    return current < capacity || willBeFreed.count(room) > 0;
+    return futureOccupantsCount.at(room) < roomCapacity[room];
 }
 
 int main() {
     int numAnts;
     if (!readInput("input.txt", numAnts)) return 1;
 
-    // Create ants and place them in Sv
-    for (int i = 1; i <= numAnts; ++i) {
-        ants.push_back(Ant("f" + to_string(i)));
-        roomOccupants["Sv"].push_back(ants.back().name);
+    // Trouver tous les plus courts chemins Sv -> Sd
+    vector<vector<string>> shortestPaths;
+    findAllShortestPaths("Sv", "Sd", shortestPaths);
+
+    if (shortestPaths.empty()) {
+        cerr << "[ERROR] No path from Sv to Sd found." << endl;
+        return 1;
     }
 
-    // Validate graph
-    if (!isReachable()) {
-        cerr << "[ERROR] Sd is not reachable from Sv. Check your input.txt." << endl;
-        return 1;
+    cout << "[INFO] Found " << shortestPaths.size() << " shortest paths from Sv to Sd." << endl;
+    for (const auto& p : shortestPaths) {
+        for (const auto& room : p) cout << room << " ";
+        cout << endl;
+    }
+
+    // Créer fourmis et leur assigner un chemin (distribution équitable)
+    for (int i = 0; i < numAnts; ++i) {
+        const vector<string>& path = shortestPaths[i % shortestPaths.size()];
+        ants.emplace_back("f" + to_string(i + 1), path);
+        roomOccupants["Sv"].push_back(ants.back().name);
     }
 
     int step = 1;
@@ -141,51 +136,58 @@ int main() {
         allFinished = true;
         bool anyMove = false;
 
-        map<string, vector<string>> tempOccupants = roomOccupants;
-        set<string> releasedRooms;
-        vector<pair<int, string>> plannedMoves;
-
-        // Plan movements
-        for (int i = 0; i < ants.size(); ++i) {
-            Ant& ant = ants[i];
-            if (ant.finished) continue;
-
-            string current = ant.position;
-            vector<string> path = shortestPath(current, "Sd");
-            if (path.size() < 2) continue;
-
-            string next = path[1];
-
-            if (canEnter(next, releasedRooms, tempOccupants)) {
-                plannedMoves.push_back({i, next});
-                if (current != "Sv" && current != "Sd") releasedRooms.insert(current);
-                tempOccupants[next].push_back(ant.name);
-                tempOccupants[current].erase(remove(tempOccupants[current].begin(),
-                    tempOccupants[current].end(), ant.name), tempOccupants[current].end());
-                anyMove = true;
-            }
-
-            if (ant.position != "Sd") allFinished = false;
+        // Compte des occupants futurs pour éviter dépassement
+        map<string, int> futureOccupantsCount;
+        for (auto& [room, occupants] : roomOccupants) {
+            futureOccupantsCount[room] = occupants.size();
         }
 
-        // Execute planned moves
+        // Préparer déplacements
+        vector<pair<int, string>> plannedMoves; // {indiceFourmi, prochaineSalle}
+
+        for (int i = 0; i < (int)ants.size(); ++i) {
+            Ant& ant = ants[i];
+            if (ant.finished) continue;
+            allFinished = false;
+
+            int currPos = ant.positionIndex;
+            if (currPos + 1 >= (int)ant.path.size()) {
+                // déjà à Sd
+                ant.finished = true;
+                continue;
+            }
+
+            string nextRoom = ant.path[currPos + 1];
+
+            // Vérifier capacité et si on peut entrer
+            if (canEnter(nextRoom, futureOccupantsCount)) {
+                plannedMoves.push_back({i, nextRoom});
+                futureOccupantsCount[nextRoom]++;
+                futureOccupantsCount[ant.path[currPos]]--;
+                anyMove = true;
+            }
+            // sinon, la fourmi attend
+        }
+
+        // Exécuter déplacements
         if (anyMove) {
             cout << "+++ Step " << step << " +++" << endl;
             for (auto& move : plannedMoves) {
                 int idx = move.first;
-                string from = ants[idx].position;
+                Ant& ant = ants[idx];
+                string from = ant.path[ant.positionIndex];
                 string to = move.second;
 
-                ants[idx].position = to;
-                if (to == "Sd") ants[idx].finished = true;
+                // Mettre à jour position fourmi
+                ant.positionIndex++;
+                ant.finished = (to == "Sd");
 
-                roomOccupants[to].push_back(ants[idx].name);
-                if (from != "Sv" && from != "Sd") {
-                    roomOccupants[from].erase(remove(roomOccupants[from].begin(),
-                        roomOccupants[from].end(), ants[idx].name), roomOccupants[from].end());
-                }
+                // Mise à jour occupants
+                auto& fromList = roomOccupants[from];
+                fromList.erase(remove(fromList.begin(), fromList.end(), ant.name), fromList.end());
+                roomOccupants[to].push_back(ant.name);
 
-                cout << ants[idx].name << " moves to " << to << endl;
+                cout << ant.name << " moves to " << to << endl;
             }
             cout << endl;
             step++;
