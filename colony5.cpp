@@ -3,10 +3,10 @@
 #include <vector>
 #include <queue>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
-// Ant class
 class Ant {
 public:
     string name;
@@ -27,45 +27,34 @@ map<string, int> roomCapacity;
 
 const int NUM_ANTS = 50;
 
-// Add bidirectional tunnel
 void addTunnel(const string& a, const string& b) {
     colony[a].push_back(b);
     colony[b].push_back(a);
 }
 
-// Find all shortest paths from start to target
-vector<vector<string>> findAllShortestPaths(string start, string target) {
+// Simple BFS to find shortest path
+vector<string> findShortestPath(string start, string target) {
+    if (start == target) return {start};
+
     queue<vector<string>> q;
-    map<string, int> distances;
-    vector<vector<string>> allPaths;
+    map<string, bool> visited;
 
     q.push({start});
-    distances[start] = 0;
-    int minLength = INT_MAX;
+    visited[start] = true;
 
     while (!q.empty()) {
         vector<string> path = q.front();
         q.pop();
         string last = path.back();
-        int currentLength = path.size() - 1;
-
-        // Skip if we already found shorter paths
-        if (currentLength > minLength) continue;
-
-        if (last == target) {
-            if (currentLength < minLength) {
-                minLength = currentLength;
-                allPaths.clear(); // New shortest path found
-            }
-            if (currentLength == minLength) {
-                allPaths.push_back(path);
-            }
-            continue;
-        }
 
         for (const string& neighbor : colony[last]) {
-            if (distances.count(neighbor) == 0 || distances[neighbor] >= currentLength + 1) {
-                distances[neighbor] = currentLength + 1;
+            if (neighbor == target) {
+                path.push_back(neighbor);
+                return path;
+            }
+
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
                 vector<string> newPath = path;
                 newPath.push_back(neighbor);
                 q.push(newPath);
@@ -73,53 +62,109 @@ vector<vector<string>> findAllShortestPaths(string start, string target) {
         }
     }
 
-    return allPaths;
+    return {}; // No path found
 }
 
-// Smart path selection: chooses intelligently among equivalent paths
-vector<string> smartPath(string start, string target, int antIndex, const map<string, int>& currentTempOccupancy) {
-    vector<vector<string>> allPaths = findAllShortestPaths(start, target);
+// Get all possible next moves for ants at given position
+vector<string> getPossibleNextRooms(string currentPos) {
+    vector<string> nextRooms;
 
-    if (allPaths.empty()) return {};
-
-    cout << "  [SMART] Ant f" << antIndex + 1 << " - Possible paths from " << start << " to " << target << ":" << endl;
-    for (int i = 0; i < allPaths.size(); i++) {
-        cout << "    [" << i << "] ";
-        for (int j = 0; j < allPaths[i].size(); j++) {
-            cout << allPaths[i][j];
-            if (j < allPaths[i].size() - 1) cout << " -> ";
-        }
-        cout << endl;
+    if (currentPos == "Sv") {
+        nextRooms.push_back("S1"); // Only S1 from Sv
+    }
+    else if (currentPos == "S1") {
+        nextRooms.push_back("S2");
+        nextRooms.push_back("S6");
+    }
+    else if (currentPos == "S2") {
+        nextRooms.push_back("S3");
+        nextRooms.push_back("S5");
+    }
+    else if (currentPos == "S3") {
+        nextRooms.push_back("S4");
+    }
+    else if (currentPos == "S4") {
+        nextRooms.push_back("Sd");
+    }
+    else if (currentPos == "S5") {
+        nextRooms.push_back("S4");
+    }
+    else if (currentPos == "S6") {
+        nextRooms.push_back("S7");
+        nextRooms.push_back("S8");
+    }
+    else if (currentPos == "S7") {
+        nextRooms.push_back("S9");
+        nextRooms.push_back("S10");
+    }
+    else if (currentPos == "S8") {
+        nextRooms.push_back("S11");
+        nextRooms.push_back("S12");
+    }
+    else if (currentPos == "S9") {
+        nextRooms.push_back("S14");
+    }
+    else if (currentPos == "S10") {
+        nextRooms.push_back("S14");
+    }
+    else if (currentPos == "S11") {
+        nextRooms.push_back("S13");
+    }
+    else if (currentPos == "S12") {
+        nextRooms.push_back("S13");
+    }
+    else if (currentPos == "S13") {
+        nextRooms.push_back("Sd");
+    }
+    else if (currentPos == "S14") {
+        nextRooms.push_back("Sd");
     }
 
-    // Selection strategy: prefer paths with less congested next room
-    int bestPathIndex = 0;
-    int minCongestion = INT_MAX;
-
-    for (int i = 0; i < allPaths.size(); i++) {
-        if (allPaths[i].size() < 2) continue; // Already at destination
-
-        string nextRoom = allPaths[i][1];
-        int congestion = 0;
-
-        if (nextRoom != "Sd" && currentTempOccupancy.count(nextRoom)) {
-            congestion = currentTempOccupancy.at(nextRoom);
-        }
-
-        cout << "    Path [" << i << "] next room " << nextRoom << " congestion: " << congestion << endl;
-
-        if (congestion < minCongestion) {
-            minCongestion = congestion;
-            bestPathIndex = i;
-        }
-    }
-
-    cout << "  [SMART] Ant f" << antIndex + 1 << " chooses path [" << bestPathIndex << "] (least congested)" << endl;
-
-    return allPaths[bestPathIndex];
+    return nextRooms;
 }
 
-// DEBUG: Function to display room status
+// Choose best next room based on distance to Sd and room availability
+string chooseBestNextRoom(string currentPos, const map<string, int>& tempOccupancy) {
+    vector<string> options = getPossibleNextRooms(currentPos);
+
+    if (options.empty()) return "";
+
+    // If only one option, return it
+    if (options.size() == 1) {
+        string nextRoom = options[0];
+        if (nextRoom == "Sd") return nextRoom;
+
+        int currentOccupancy = tempOccupancy.count(nextRoom) ? tempOccupancy.at(nextRoom) : 0;
+        int capacity = roomCapacity.count(nextRoom) ? roomCapacity.at(nextRoom) : 1;
+
+        if (currentOccupancy < capacity) {
+            return nextRoom;
+        }
+        return ""; // Room full
+    }
+
+    // Multiple options - choose the one with shortest path to Sd and available space
+    string bestRoom = "";
+    int shortestDistance = INT_MAX;
+
+    for (const string& room : options) {
+        if (room == "Sd") return room; // Always prefer direct path to Sd
+
+        int currentOccupancy = tempOccupancy.count(room) ? tempOccupancy.at(room) : 0;
+        int capacity = roomCapacity.count(room) ? roomCapacity.at(room) : 1;
+
+        if (currentOccupancy < capacity) {
+            vector<string> pathToSd = findShortestPath(room, "Sd");
+            if (!pathToSd.empty() && pathToSd.size() - 1 < shortestDistance) {
+                shortestDistance = pathToSd.size() - 1;
+                bestRoom = room;
+            }
+        }
+    }
+
+    return bestRoom;
+}
+
 void printRoomStatus() {
     cout << "  [STATE] Room occupancy: ";
     for (auto& room : roomOccupancy) {
@@ -130,23 +175,17 @@ void printRoomStatus() {
     cout << endl;
 }
 
-// DEBUG: Function to display ant positions
 void printAntPositions(const vector<Ant>& ants) {
-    cout << "  [ANTS] Positions: ";
-    map<string, vector<string>> positionGroups;
+    map<string, int> positionCount;
     for (const auto& ant : ants) {
         if (!ant.finished) {
-            positionGroups[ant.position].push_back(ant.name);
+            positionCount[ant.position]++;
         }
     }
 
-    for (auto& group : positionGroups) {
-        cout << group.first << ":(";
-        for (int i = 0; i < group.second.size(); i++) {
-            cout << group.second[i];
-            if (i < group.second.size() - 1) cout << ",";
-        }
-        cout << ") ";
+    cout << "  [ANTS] Positions: ";
+    for (auto& pos : positionCount) {
+        cout << pos.first << ":" << pos.second << " ";
     }
     cout << endl;
 }
@@ -174,7 +213,7 @@ int main() {
     addTunnel("S8", "S11");
     addTunnel("S11", "S13");
 
-    // Define max occupancy per room
+    // Define room capacities
     roomCapacity = {
         {"S1", 8},
         {"S2", 4},
@@ -189,10 +228,10 @@ int main() {
         {"S11", 1},
         {"S12", 1},
         {"S13", 4},
-        {"S14", 2},
+        {"S14", 2}
     };
 
-    // Initialize room occupancy to 0
+    // Initialize room occupancy
     for (const auto& room : roomCapacity) {
         roomOccupancy[room.first] = 0;
     }
@@ -203,96 +242,67 @@ int main() {
         ants.push_back(Ant("f" + to_string(i)));
     }
 
-    cout << "\nColony Four \n" << endl;
+    cout << "\nColony Five\n" << endl;
     cout << "Number of ants: " << ants.size() << endl;
-    cout << endl;
-
-    // DEBUG: Display all possible paths from Sv
-    cout << "[DEBUG] Analysis of possible paths from Sv:" << endl;
-    vector<vector<string>> initialPaths = findAllShortestPaths("Sv", "Sd");
-    for (int i = 0; i < initialPaths.size(); i++) {
-        cout << "  Path " << i << ": ";
-        for (int j = 0; j < initialPaths[i].size(); j++) {
-            cout << initialPaths[i][j];
-            if (j < initialPaths[i].size() - 1) cout << " -> ";
-        }
-        cout << endl;
-    }
     cout << endl;
 
     int step = 1;
     bool allFinished = false;
 
-    while (!allFinished) {
+    while (!allFinished && step <= 20) { // Safety limit
         allFinished = true;
-        bool anyMove = false;
 
-        cout << "[DEBUG] === PLANNING STEP " << step << " ===" << endl;
-        printAntPositions(ants);
-        printRoomStatus();
+
 
         vector<pair<int, string>> plannedMoves;
-        map<string, int> tempOccupancy = roomOccupancy; // Copy of current occupancy
+        map<string, int> tempOccupancy = roomOccupancy;
 
-        // Sequential planning with immediate update of temporary occupancy
-        for (int i = 0; i < ants.size(); ++i) {
-            Ant& ant = ants[i];
-            if (ant.finished) continue;
+        // Process ants in waves - prioritize by current position: closer to Sd gets priority to avoid blocking
+        vector<int> antOrder;
+        for (int i = 0; i < ants.size(); i++) {
+            if (!ants[i].finished) {
+                antOrder.push_back(i);
+            }
+        }
 
+        // Sort ants: first by distance to Sd (closer first), then by ant number (f1, f2, f3...)
+        sort(antOrder.begin(), antOrder.end(), [&](int a, int b) {
+            vector<string> pathA = findShortestPath(ants[a].position, "Sd");
+            vector<string> pathB = findShortestPath(ants[b].position, "Sd");
+
+            // If same distance, sort by ant index (f1 before f2, etc.)
+            if (pathA.size() == pathB.size()) {
+                return a < b; // Lower index first (f1 before f2)
+            }
+            return pathA.size() < pathB.size(); // Closer ants first
+        });
+
+        for (int antIndex : antOrder) {
+            Ant& ant = ants[antIndex];
             string current = ant.position;
-            cout << "  Planning for " << ant.name << " (at " << current << "):" << endl;
 
-            vector<string> path = smartPath(current, "Sd", i, tempOccupancy);
-            if (path.size() < 2) {
-                cout << "    -> Already arrived" << endl;
-                continue;
-            }
+            string nextRoom = chooseBestNextRoom(current, tempOccupancy);
 
-            string next = path[1];
-            cout << "    -> Wants to go to " << next << endl;
+            if (!nextRoom.empty()) {
+                plannedMoves.push_back({antIndex, nextRoom});
 
-            bool canMove = false;
-
-            if (next == "Sd") {
-                canMove = true;
-                cout << "    -> Can go to Sd (final destination)" << endl;
-            } else {
-                // Use temporary occupancy (includes already planned moves)
-                int currentTempOccupancy = tempOccupancy[next];
-                bool hasSpace = currentTempOccupancy < roomCapacity[next];
-
-                cout << "    -> " << next << " temporary state: occupied=" << currentTempOccupancy
-                     << ", capacity=" << roomCapacity[next] << endl;
-
-                if (hasSpace) {
-                    canMove = true;
-                    cout << "    -> Movement authorized" << endl;
-                } else {
-                    cout << "    -> Movement blocked (room full)" << endl;
-                }
-            }
-
-            if (canMove) {
-                plannedMoves.push_back({i, next});
-
-                // Immediately update temporary occupancy
+                // Update temporary occupancy
                 if (current != "Sv" && current != "Sd") {
                     tempOccupancy[current]--;
                 }
-                if (next != "Sv" && next != "Sd") {
-                    tempOccupancy[next]++;
+                if (nextRoom != "Sv" && nextRoom != "Sd") {
+                    tempOccupancy[nextRoom]++;
                 }
 
-                anyMove = true;
-                cout << "    -> PLANNED MOVEMENT: " << ant.name << " to " << next << endl;
+
             }
 
             if (ant.position != "Sd") allFinished = false;
         }
 
-        // Apply all planned movements
-        if (anyMove) {
-            cout << "\n+++ Step " << step << " +++" << endl;
+        // Apply planned moves
+        if (!plannedMoves.empty()) {
+            cout << "\n+++ step " << step << " +++" << endl;
 
             for (auto& move : plannedMoves) {
                 int idx = move.first;
@@ -306,13 +316,12 @@ int main() {
                 ants[idx].position = to;
                 if (to == "Sd") ants[idx].finished = true;
 
-                cout << ants[idx].name << " moves to " << to << endl;
+                cout << ants[idx].name << " - " << from << " - " << to << endl;
             }
 
             cout << endl;
             step++;
         } else {
-            cout << "[DEBUG] No movement possible - STOP" << endl;
             break;
         }
     }
