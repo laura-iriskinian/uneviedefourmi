@@ -1,15 +1,32 @@
-cmake_minimum_required(VERSION 3.10)
-project(AntColony)
+cmake_minimum_required(VERSION 3.16)
 
-# Spécifier la version du standard C++
+# Project name
+project(uneviedefourmi)
+
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Créer un exécutable pour colony1.cpp
-add_executable(colony1 colony1.cpp)
+# Add compiler flags for better debugging and warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-# Créer un exécutable pour colony2.cpp
-add_executable(colony2 colony2.cpp)
+# Include directories (if needed)
+include_directories(.)
 
-# Créer un exécutable pour colony5.cpp
-add_executable(colony5 colony5.cpp)
+# Add executable
+add_executable(uneviedefourmi
+        main.cpp
+        ants.cpp
+        ants.h
+)
+
+# Optional: Copy test files to build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_zero.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_un.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_deux.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_trois.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_quatre.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_cinq.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_3D.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/everything_everywhere.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/salle_d_at-ant.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
