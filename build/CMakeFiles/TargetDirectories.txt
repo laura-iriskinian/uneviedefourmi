@@ -1,0 +1,6 @@
+/home/laura/uneviedefourmi/build/CMakeFiles/colony1.dir
+/home/laura/uneviedefourmi/build/CMakeFiles/colony2.dir
+/home/laura/uneviedefourmi/build/CMakeFiles/colony5.dir
+/home/laura/uneviedefourmi/build/CMakeFiles/ants.dir
+/home/laura/uneviedefourmi/build/CMakeFiles/edit_cache.dir
+/home/laura/uneviedefourmi/build/CMakeFiles/rebuild_cache.dir

@@ -13,3 +13,5 @@ add_executable(colony2 colony2.cpp)
 
 # Créer un exécutable pour colony5.cpp
 add_executable(colony5 colony5.cpp)
+
+add_executable(ants ants.cpp)

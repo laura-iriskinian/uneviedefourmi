@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/colony2.dir/colony2.cpp.o -o colony2 

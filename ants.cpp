@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <climits>
+#include <ctime>
+#include <iomanip>
 
 using namespace std;
 
@@ -200,6 +203,7 @@ bool compareRooms(const pair<string, int>& a, const pair<string, int>& b) {
         int numB = stoi(roomB.substr(1));
         return numA < numB;
     }
+    return false;
 }
 
 // Presentation for results
@@ -234,6 +238,9 @@ void printColonyInfo() {
 
 // Main program loop
 int main(int argc, char* argv[]) {
+    // Démarrer le chronométrage total
+    clock_t start_total = clock();
+    
     string filename;
     
     if (argc > 1) {
@@ -243,9 +250,13 @@ int main(int argc, char* argv[]) {
         cin >> filename;
     }
 
+    // Chronométrer le chargement du fichier
+    clock_t start_load = clock();
     if (!loadColonyFromFile(filename)) {
         return 1;
     }
+    clock_t end_load = clock();
+    double load_time = double(end_load - start_load) / CLOCKS_PER_SEC;
 
     printColonyInfo();
 
@@ -258,6 +269,9 @@ int main(int argc, char* argv[]) {
     cout << "Starting simulation with " << ants.size() << " ants" << endl;
     cout << endl;
 
+    // Chronométrer la simulation
+    clock_t start_simulation = clock();
+    
     int step = 1;
     bool allFinished = false;
 
@@ -333,6 +347,23 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    clock_t end_simulation = clock();
+    clock_t end_total = clock();
+    
+    // Calculer les temps d'exécution
+    double simulation_time = double(end_simulation - start_simulation) / CLOCKS_PER_SEC;
+    double total_time = double(end_total - start_total) / CLOCKS_PER_SEC;
+
     cout << "All ants have reached Sd in " << step - 1 << " steps!" << endl;
+    cout << endl;
+    
+    // Afficher les statistiques de performance
+    cout << "+++ Performance Statistics +++" << endl;
+    cout << fixed << setprecision(6);
+    cout << "File loading time: " << load_time << " seconds" << endl;
+    cout << "Simulation time: " << simulation_time << " seconds" << endl;
+    cout << "Total execution time: " << total_time << " seconds" << endl;
+    cout << "Average time per step: " << (step > 1 ? simulation_time / (step - 1) : 0) << " seconds" << endl;
+    
     return 0;
 }
