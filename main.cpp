@@ -11,12 +11,9 @@ int main(int argc, char* argv[]) {
         cin >> filename;
     }
 
-    // Time the file loading
-    startLoadTimer();
     if (!loadColonyFromFile(filename)) {
         return 1;
     }
-    endLoadTimer();
 
     printColonyInfo();
 
@@ -28,9 +25,6 @@ int main(int argc, char* argv[]) {
 
     cout << "Starting simulation with " << ants.size() << " ants" << endl;
     cout << endl;
-
-    // Time the simulation
-    startSimulationTimer();
 
     int step = 1;
     bool allFinished = false;
@@ -107,14 +101,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // End simulation timer
-    endSimulationTimer();
-
     cout << "All ants have reached Sd in " << step - 1 << " steps!" << endl;
-    cout << endl;
-
-    // Print timing statistics
-    printTimingStatistics(step - 1);
 
     return 0;
 }
