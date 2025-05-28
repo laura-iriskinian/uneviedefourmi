@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisateur de Fourmilière</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        .terminal {
+            background-color: #000;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .step-header {
+            color: #ffff00;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .colony-map {
+            border: 1px solid #444;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #111;
+        }
+        .room {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            border: 1px solid #666;
+            border-radius: 5px;
+            min-width: 80px;
+            text-align: center;
+            vertical-align: top;
+        }
+        .room-sv { background-color: #004400; color: #00ff00; }
+        .room-sd { background-color: #440000; color: #ff4444; }
+        .room-intermediate { background-color: #003366; color: #66ccff; }
+        .ant {
+            display: inline-block;
+            margin: 2px;
+            padding: 2px 6px;
+            background-color: #8B4513;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .movement {
+            color: #ffaa00;
+            margin: 5px 0;
+        }
+        .arrow { color: #ff6600; }
+        .stats {
+            background-color: #002200;
+            border-left: 3px solid #00ff00;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        h1, h2 { color: #00ffff; }
+        .file-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #222;
+            border-radius: 5px;
+        }
+        select, button {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background-color: #555;
+            cursor: pointer;
+        }
+        .step-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .step-controls button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+<h1>🐜 VISUALISATEUR DE FOURMILIÈRE 🐜</h1>
+
+<div class="file-selector">
+    <label for="anthill-select">Choisir une fourmilière :</label>
+    <select id="anthill-select">
+        <option value="zero">Fourmilière Zero (2 fourmis)</option>
+        <option value="un">Fourmilière Un (5 fourmis)</option>
+        <option value="deux">Fourmilière Deux (5 fourmis)</option>
+        <option value="trois">Fourmilière Trois (5 fourmis)</option>
+        <option value="quatre">Fourmilière Quatre (10 fourmis)</option>
+        <option value="cinq">Fourmilière Cinq (50 fourmis)</option>
+    </select>
+    <button onclick="loadAnthill()">Charger</button>
+    <button onclick="resetSimulation()">Reset</button>
+</div>
+
+<div class="legend">
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #004400;"></div>
+        <span>Source (Sv)</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #003366;"></div>
+        <span>Salles</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #440000;"></div>
+        <span>Destination (Sd)</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #8B4513;"></div>
+        <span>Fourmis</span>
+    </div>
+</div>
+
+<div class="step-controls">
+    <button onclick="previousStep()" id="prev-btn" disabled>◀ Précédent</button>
+    <button onclick="nextStep()" id="next-btn">Suivant ▶</button>
+    <button onclick="autoPlay()" id="auto-btn">▶ Auto</button>
+    <button onclick="stopAuto()" id="stop-btn" disabled>⏸ Stop</button>
+</div>
+
+<div id="simulation-display"></div>
+
+<script>
+    let currentAnthill = null;
+    let currentStep = 0;
+    let autoInterval = null;
+
+    const anthillData = {
+        zero: {
+            name: "Fourmilière Zero",
+            numAnts: 2,
+            rooms: { "S1": 1, "S2": 1 },
+            tunnels: [["Sv", "S1"], ["Sv", "S2"], ["S1", "Sd"], ["S2", "Sd"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": ["f1", "f2"]} },
+                { step: 1, movements: [["f1", "Sv", "S1"], ["f2", "Sv", "S2"]], positions: {"S1": ["f1"], "S2": ["f2"]} },
+                { step: 2, movements: [["f1", "S1", "Sd"], ["f2", "S2", "Sd"]], positions: {"Sd": ["f1", "f2"]} }
+            ]
+        },
+        un: {
+            name: "Fourmilière Un",
+            numAnts: 5,
+            rooms: { "S1": 1, "S2": 1 },
+            tunnels: [["Sv", "S1"], ["S1", "S2"], ["S2", "Sd"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": ["f1", "f2", "f3", "f4", "f5"]} },
+                { step: 1, movements: [["f1", "Sv", "S1"]], positions: {"Sv": ["f2", "f3", "f4", "f5"], "S1": ["f1"]} },
+                { step: 2, movements: [["f1", "S1", "S2"], ["f2", "Sv", "S1"]], positions: {"Sv": ["f3", "f4", "f5"], "S1": ["f2"], "S2": ["f1"]} },
+                { step: 3, movements: [["f1", "S2", "Sd"], ["f2", "S1", "S2"], ["f3", "Sv", "S1"]], positions: {"Sv": ["f4", "f5"], "S1": ["f3"], "S2": ["f2"], "Sd": ["f1"]} },
+                { step: 4, movements: [["f2", "S2", "Sd"], ["f3", "S1", "S2"], ["f4", "Sv", "S1"]], positions: {"Sv": ["f5"], "S1": ["f4"], "S2": ["f3"], "Sd": ["f1", "f2"]} },
+                { step: 5, movements: [["f3", "S2", "Sd"], ["f4", "S1", "S2"], ["f5", "Sv", "S1"]], positions: {"S1": ["f5"], "S2": ["f4"], "Sd": ["f1", "f2", "f3"]} },
+                { step: 6, movements: [["f4", "S2", "Sd"], ["f5", "S1", "S2"]], positions: {"S2": ["f5"], "Sd": ["f1", "f2", "f3", "f4"]} },
+                { step: 7, movements: [["f5", "S2", "Sd"]], positions: {"Sd": ["f1", "f2", "f3", "f4", "f5"]} }
+            ]
+        },
+        deux: {
+            name: "Fourmilière Deux",
+            numAnts: 5,
+            rooms: { "S1": 1, "S2": 1 },
+            tunnels: [["Sv", "S1"], ["S1", "S2"], ["S2", "Sd"], ["Sd", "Sv"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": ["f1", "f2", "f3", "f4", "f5"]} },
+                { step: 1, movements: [["f1", "Sv", "Sd"]], positions: {"Sv": ["f2", "f3", "f4", "f5"], "Sd": ["f1"]} },
+                { step: 2, movements: [["f2", "Sv", "Sd"]], positions: {"Sv": ["f3", "f4", "f5"], "Sd": ["f1", "f2"]} },
+                { step: 3, movements: [["f3", "Sv", "Sd"]], positions: {"Sv": ["f4", "f5"], "Sd": ["f1", "f2", "f3"]} },
+                { step: 4, movements: [["f4", "Sv", "Sd"]], positions: {"Sv": ["f5"], "Sd": ["f1", "f2", "f3", "f4"]} },
+                { step: 5, movements: [["f5", "Sv", "Sd"]], positions: {"Sd": ["f1", "f2", "f3", "f4", "f5"]} }
+            ]
+        },
+        trois: {
+            name: "Fourmilière Trois",
+            numAnts: 5,
+            rooms: { "S1": 1, "S2": 1, "S3": 1, "S4": 1 },
+            tunnels: [["Sv", "S1"], ["S1", "S2"], ["S4", "Sd"], ["S1", "S4"], ["S2", "S3"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": ["f1", "f2", "f3", "f4", "f5"]} },
+                { step: 1, movements: [["f1", "Sv", "S1"]], positions: {"Sv": ["f2", "f3", "f4", "f5"], "S1": ["f1"]} },
+                { step: 2, movements: [["f1", "S1", "S4"], ["f2", "Sv", "S1"]], positions: {"Sv": ["f3", "f4", "f5"], "S1": ["f2"], "S4": ["f1"]} },
+                { step: 3, movements: [["f1", "S4", "Sd"], ["f2", "S1", "S4"], ["f3", "Sv", "S1"]], positions: {"Sv": ["f4", "f5"], "S1": ["f3"], "S4": ["f2"], "Sd": ["f1"]} },
+                { step: 4, movements: [["f2", "S4", "Sd"], ["f3", "S1", "S4"], ["f4", "Sv", "S1"]], positions: {"Sv": ["f5"], "S1": ["f4"], "S4": ["f3"], "Sd": ["f1", "f2"]} },
+                { step: 5, movements: [["f3", "S4", "Sd"], ["f4", "S1", "S4"], ["f5", "Sv", "S1"]], positions: {"S1": ["f5"], "S4": ["f4"], "Sd": ["f1", "f2", "f3"]} },
+                { step: 6, movements: [["f4", "S4", "Sd"], ["f5", "S1", "S4"]], positions: {"S4": ["f5"], "Sd": ["f1", "f2", "f3", "f4"]} },
+                { step: 7, movements: [["f5", "S4", "Sd"]], positions: {"Sd": ["f1", "f2", "f3", "f4", "f5"]} }
+            ]
+        },
+        quatre: {
+            name: "Fourmilière Quatre",
+            numAnts: 10,
+            rooms: { "S1": 2, "S2": 1, "S3": 1, "S4": 2, "S5": 1, "S6": 1 },
+            tunnels: [["S3", "S4"], ["Sv", "S1"], ["S1", "S2"], ["S2", "S4"], ["S4", "S5"], ["S5", "Sd"], ["S4", "S6"], ["S6", "Sd"], ["S1", "S3"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]} },
+                { step: 1, movements: [["f1", "Sv", "S1"], ["f2", "Sv", "S1"]], positions: {"Sv": ["f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"], "S1": ["f1", "f2"]} },
+                { step: 2, movements: [["f1", "S1", "S3"], ["f2", "S1", "S2"], ["f3", "Sv", "S1"], ["f4", "Sv", "S1"]], positions: {"Sv": ["f5", "f6", "f7", "f8", "f9", "f10"], "S1": ["f3", "f4"], "S2": ["f2"], "S3": ["f1"]} },
+                { step: 3, movements: [["f1", "S3", "S4"], ["f2", "S2", "S4"], ["f3", "S1", "S3"], ["f4", "S1", "S2"], ["f5", "Sv", "S1"], ["f6", "Sv", "S1"]], positions: {"Sv": ["f7", "f8", "f9", "f10"], "S1": ["f5", "f6"], "S2": ["f4"], "S3": ["f3"], "S4": ["f1", "f2"]} },
+                { step: 4, movements: [["f1", "S4", "S5"], ["f2", "S4", "S6"], ["f3", "S3", "S4"], ["f4", "S2", "S4"], ["f5", "S1", "S3"], ["f6", "S1", "S2"], ["f7", "Sv", "S1"], ["f8", "Sv", "S1"]], positions: {"Sv": ["f9", "f10"], "S1": ["f7", "f8"], "S2": ["f6"], "S3": ["f5"], "S4": ["f3", "f4"], "S5": ["f1"], "S6": ["f2"]} },
+                { step: 5, movements: [["f1", "S5", "Sd"], ["f2", "S6", "Sd"], ["f3", "S4", "S5"], ["f4", "S4", "S6"], ["f5", "S3", "S4"], ["f6", "S2", "S4"], ["f7", "S1", "S3"], ["f8", "S1", "S2"], ["f9", "Sv", "S1"], ["f10", "Sv", "S1"]], positions: {"S1": ["f9", "f10"], "S2": ["f8"], "S3": ["f7"], "S4": ["f5", "f6"], "S5": ["f3"], "S6": ["f4"], "Sd": ["f1", "f2"]} },
+                { step: 6, movements: [["f3", "S5", "Sd"], ["f4", "S6", "Sd"], ["f5", "S4", "S5"], ["f6", "S4", "S6"], ["f7", "S3", "S4"], ["f8", "S2", "S4"], ["f9", "S1", "S3"], ["f10", "S1", "S2"]], positions: {"S2": ["f10"], "S3": ["f9"], "S4": ["f7", "f8"], "S5": ["f5"], "S6": ["f6"], "Sd": ["f1", "f2", "f3", "f4"]} },
+                { step: 7, movements: [["f5", "S5", "Sd"], ["f6", "S6", "Sd"], ["f7", "S4", "S5"], ["f8", "S4", "S6"], ["f9", "S3", "S4"], ["f10", "S2", "S4"]], positions: {"S4": ["f9", "f10"], "S5": ["f7"], "S6": ["f8"], "Sd": ["f1", "f2", "f3", "f4", "f5", "f6"]} },
+                { step: 8, movements: [["f7", "S5", "Sd"], ["f8", "S6", "Sd"], ["f9", "S4", "S5"], ["f10", "S4", "S6"]], positions: {"S5": ["f9"], "S6": ["f10"], "Sd": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]} },
+                { step: 9, movements: [["f9", "S5", "Sd"], ["f10", "S6", "Sd"]], positions: {"Sd": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]} }
+            ]
+        },
+        cinq: {
+            name: "Fourmilière Cinq",
+            numAnts: 50,
+            rooms: { "S1": 8, "S2": 4, "S3": 2, "S4": 4, "S5": 2, "S6": 4, "S7": 2, "S8": 5, "S9": 1, "S10": 1, "S11": 1, "S12": 1, "S13": 4, "S14": 2 },
+            tunnels: [["S1", "S2"], ["S2", "S3"], ["S3", "S4"], ["S4", "Sd"], ["Sv", "S1"], ["S2", "S5"], ["S5", "S4"], ["S13", "Sd"], ["S8", "S12"], ["S12", "S13"], ["S6", "S7"], ["S7", "S9"], ["S9", "S14"], ["S14", "Sd"], ["S7", "S10"], ["S10", "S14"], ["S1", "S6"], ["S6", "S8"], ["S8", "S11"], ["S11", "S13"]],
+            steps: [
+                { step: 0, movements: [], positions: {"Sv": Array.from({length: 50}, (_, i) => `f${i+1}`)} },
+                { step: 1, movements: [["f1", "Sv", "S1"], ["f2", "Sv", "S1"], ["f3", "Sv", "S1"], ["f4", "Sv", "S1"], ["f5", "Sv", "S1"], ["f6", "Sv", "S1"], ["f7", "Sv", "S1"], ["f8", "Sv", "S1"]], positions: {"Sv": Array.from({length: 42}, (_, i) => `f${i+9}`), "S1": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]} }
+            ]
+        }
+    };
+
+    function loadAnthill() {
+        const select = document.getElementById('anthill-select');
+        const selectedKey = select.value;
+        currentAnthill = anthillData[selectedKey];
+        currentStep = 0;
+        updateDisplay();
+        updateButtons();
+    }
+
+    function updateDisplay() {
+        if (!currentAnthill) return;
+
+        const display = document.getElementById('simulation-display');
+        const stepData = currentAnthill.steps[currentStep];
+
+        let html = `
+                <div class="terminal">
+                    <div class="step-header">=== ${currentAnthill.name} - Étape ${stepData.step} ===</div>
+
+                    <div class="stats">
+                        <strong>Informations:</strong><br>
+                        Nombre de fourmis: ${currentAnthill.numAnts}<br>
+                        Capacités des salles: ${Object.entries(currentAnthill.rooms).map(([room, cap]) => `${room}(${cap})`).join(', ')}<br>
+                        Étape actuelle: ${stepData.step}/${currentAnthill.steps.length - 1}
+                    </div>
+
+                    <div class="colony-map">
+                        <div style="text-align: center; margin-bottom: 15px; color: #ffff00;">
+                            <strong>ÉTAT DE LA FOURMILIÈRE</strong>
+                        </div>
+            `;
+
+        // Afficher Source (Sv)
+        html += `<div class="room room-sv">
+                        <div><strong>Sv</strong> (Source)</div>
+                        <div>`;
+        if (stepData.positions["Sv"]) {
+            stepData.positions["Sv"].forEach(ant => {
+                html += `<span class="ant">${ant}</span>`;
+            });
+        }
+        html += `</div></div>`;
+
+        // Afficher les salles intermédiaires
+        Object.keys(currentAnthill.rooms).forEach(room => {
+            html += `<div class="room room-intermediate">
+                            <div><strong>${room}</strong> (${currentAnthill.rooms[room]})</div>
+                            <div>`;
+            if (stepData.positions[room]) {
+                stepData.positions[room].forEach(ant => {
+                    html += `<span class="ant">${ant}</span>`;
+                });
+            }
+            html += `</div></div>`;
+        });
+
+        // Afficher Destination (Sd)
+        html += `<div class="room room-sd">
+                        <div><strong>Sd</strong> (Destination)</div>
+                        <div>`;
+        if (stepData.positions["Sd"]) {
+            stepData.positions["Sd"].forEach(ant => {
+                html += `<span class="ant">${ant}</span>`;
+            });
+        }
+        html += `</div></div>`;
+
+        html += `</div>`;
+
+        // Afficher les mouvements de cette étape
+        if (stepData.movements.length > 0) {
+            html += `<div style="margin: 15px 0;">
+                            <div style="color: #ffaa00; font-weight: bold;">Mouvements cette étape:</div>`;
+            stepData.movements.forEach(([ant, from, to]) => {
+                html += `<div class="movement">${ant}: ${from} <span class="arrow">→</span> ${to}</div>`;
+            });
+            html += `</div>`;
+        }
+
+        // Afficher les tunnels
+        html += `<div style="margin: 15px 0;">
+                        <div style="color: #66ccff; font-weight: bold;">Tunnels disponibles:</div>`;
+        currentAnthill.tunnels.forEach(([room1, room2]) => {
+            html += `<div style="color: #999; margin: 2px 0;">${room1} ↔ ${room2}</div>`;
+        });
+        html += `</div>`;
+
+        html += `</div>`;
+        display.innerHTML = html;
+    }
+
+    function nextStep() {
+        if (currentAnthill && currentStep < currentAnthill.steps.length - 1) {
+            currentStep++;
+            updateDisplay();
+            updateButtons();
+        }
+    }
+
+    function previousStep() {
+        if (currentStep > 0) {
+            currentStep--;
+            updateDisplay();
+            updateButtons();
+        }
+    }
+
+    function resetSimulation() {
+        currentStep = 0;
+        updateDisplay();
+        updateButtons();
+    }
+
+    function autoPlay() {
+        if (autoInterval) return;
+
+        document.getElementById('auto-btn').disabled = true;
+        document.getElementById('stop-btn').disabled = false;
+
+        autoInterval = setInterval(() => {
+            if (currentStep < currentAnthill.steps.length - 1) {
+                nextStep();
+            } else {
+                stopAuto();
+            }
+        }, 1500);
+    }
+
+    function stopAuto() {
+        if (autoInterval) {
+            clearInterval(autoInterval);
+            autoInterval = null;
+        }
+        document.getElementById('auto-btn').disabled = false;
+        document.getElementById('stop-btn').disabled = true;
+    }
+
+    function updateButtons() {
+        document.getElementById('prev-btn').disabled = currentStep === 0;
+        document.getElementById('next-btn').disabled = !currentAnthill || currentStep >= currentAnthill.steps.length - 1;
+    }
+
+    // Charger la première fourmilière par défaut
+    window.onload = function() {
+        loadAnthill();
+    }
+</script>
+</body>
+</html>
