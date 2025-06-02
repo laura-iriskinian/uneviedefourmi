@@ -5,10 +5,10 @@ BFS                                            Dijkstra
 All ants have reached Sd in 2 steps!
 
 +++ Performance Statistics +++
-File loading time: 0.002000 seconds             0.001000 seconds
-Simulation time: 0.013000 seconds               0.009000 seconds
-Total execution time: 12.052000 seconds         9.265000 seconds
-Average time per step: 0.006500 seconds         0.004500 seconds
+File loading time: 0.001000 seconds             0.000000 seconds
+Simulation time: 0.002000 seconds               0.003000 seconds
+Total execution time: 29.771000 seconds         6.183000 seconds
+Average time per step: 0.001000 seconds         0.001500 seconds
 
 FOURMILIERE UN
 
@@ -18,9 +18,9 @@ All ants have reached Sd in 7 steps!
 
 +++ Performance Statistics +++
 File loading time: 0.001000 seconds             0.001000 seconds
-Simulation time: 0.010000 seconds               0.014000 seconds
-Total execution time: 14.996000 seconds         42.492000 seconds
-Average time per step: 0.001429 seconds         0.002000 seconds
+Simulation time: 0.010000 seconds               0.011000 seconds
+Total execution time: 4.672000 seconds         10.714000 seconds
+Average time per step: 0.001429 seconds         0.001571 seconds
 
 FOURMILIERE DEUX
 
@@ -30,9 +30,9 @@ All ants have reached Sd in 1 steps!
 
 +++ Performance Statistics +++
 File loading time: 0.000000 seconds              0.000000 seconds
-Simulation time: 0.002000 seconds                0.004000 seconds
-Total execution time: 11.627000 seconds         38.127000 seconds
-Average time per step: 0.002000 seconds          0.004000 seconds
+Simulation time: 0.002000 seconds                0.003000 seconds
+Total execution time:  5.290000 seconds          7.527000 seconds
+Average time per step: 0.002000 seconds          0.003000 seconds
 
 FOURMILIERE TROIS
 
@@ -41,10 +41,10 @@ BFS                                             Dijkstra
 All ants have reached Sd in 7 steps!
 
 +++ Performance Statistics +++
-File loading time: 0.000000 seconds              0.001000 seconds
-Simulation time: 0.010000 seconds               0.016000 seconds
-Total execution time: 9.305000 seconds          22.951000 seconds
-Average time per step: 0.001429 seconds         0.002286 seconds
+File loading time: 0.000000 seconds             0.001000 seconds
+Simulation time:  0.007000 seconds              0.011000 seconds
+Total execution time: 6.121000 seconds          9.087000 seconds
+Average time per step: 0.001000 seconds         0.001571 seconds
 
 FOURMILIERE QUATRE
 
@@ -53,10 +53,10 @@ BFS                                             Dijkstra
 All ants have reached Sd in 9 steps!
 
 +++ Performance Statistics +++
-File loading time: 0.000000 seconds             0.001000 seconds
-Simulation time: 0.027000 seconds               0.048000 seconds
+File loading time: 0.000000 seconds             0.000000 seconds
+Simulation time: 0.027000 seconds               0.036000 seconds
 Total execution time: 9.162000 seconds          15.404000 seconds
-Average time per step: 0.003000 seconds         0.005333 seconds
+Average time per step: 0.003000 seconds         0.004000 seconds
 
 FOURMILIERE CINQ
 
@@ -65,10 +65,10 @@ BFS                                             Dijkstra
 All ants have reached Sd in 11 steps!           13 steps
 
 +++ Performance Statistics +++
-File loading time: 0.001000 seconds             0.002000 seconds
-Simulation time: 0.247000 seconds               0.606000 seconds
-Total execution time: 9.051000 seconds          13.327000 seconds
-Average time per step: 0.022455 seconds          0.046615 seconds
+File loading time: 0.001000 seconds             0.001000 seconds
+Simulation time: 0.236000 seconds               0.578000 seconds
+Total execution time: 9.051000 seconds          6.851000 seconds
+Average time per step: 0.021455 seconds         0.044462 seconds
 
 
 

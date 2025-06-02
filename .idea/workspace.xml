@@ -28,22 +28,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cb394508-07c3-4822-8ee3-16cd167cdbc0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/.idea/editor.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/Makefile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/bfs.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/dijkstra.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/everything_everywhere.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_3D.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_cinq.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_deux.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_quatre.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_trois.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_un.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/fourmiliere_zero.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test/salle_d_at-ant.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +94,7 @@
       <updated>1748339198638</updated>
       <workItem from="1748339201618" duration="2256000" />
       <workItem from="1748849889346" duration="4655000" />
-      <workItem from="1748855980728" duration="1000" />
+      <workItem from="1748855980728" duration="1182000" />
     </task>
     <servers />
   </component>
