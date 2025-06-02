@@ -45,7 +45,7 @@ bool loadColonyFromFile(const string& filename) {
         }
 
         // Process rooms
-        istringstream iss(line);
+        istringstream iss(line); // Enables easy parsing of a line of characters
         string roomName;
         iss >> roomName;
 

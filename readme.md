@@ -26,7 +26,7 @@ Une colonie de fourmis doit rejoindre le dortoir depuis le vestibule le plus rap
 
 #### `ants.h`
 Header contenant :
-- **Classe Ant** : Représente une fourmi avec son nom, position actuelle et statut (si elle est arrivée au dortoit ou pas)
+- **Classe Ant** : Représente une fourmi avec son nom, position actuelle et statut (si elle est arrivée au dortoir ou pas)
 - **Structure ColonyInfo** : Stocke les informations sur la colonie (nombre de fourmis, capacités des salles, graphe des tunnels)
 - **Déclarations des fonctions** : Pathfinding, gestion des mouvements, utilitaires
 
@@ -75,6 +75,13 @@ Sv - S1               # Tunnel entre vestibule et S1
 S1 - S2               # Tunnel entre S1 et S2
 S2 - Sd               # Tunnel entre S2 et dortoir
 ```
+## Compilation et Exécution
+
+### Compilation  
+g++ -o ants main.cpp ants.cpp
+
+### Exécution
+./ants
 
 ## Résultats et Performance
 
