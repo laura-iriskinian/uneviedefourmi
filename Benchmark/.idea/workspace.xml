@@ -15,7 +15,26 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f28ab71a-a498-4e9e-9e13-0371b0272b5b" name="Changes" comment="" />
+    <list default="true" id="f28ab71a-a498-4e9e-9e13-0371b0272b5b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/benchmark.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/.idea/editor.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/Makefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/bfs.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/dijkstra.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/everything_everywhere.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_3D.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_cinq.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_deux.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_quatre.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_trois.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_un.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/fourmiliere_zero.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Test/salle_d_at-ant.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../readme" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,6 +52,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/bfs.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -53,7 +75,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "colonyFour",
-    "last_opened_file_path": "C:/Users/elodi/OneDrive/Desktop/Projets_plateforme/LOGICIEL/C++/Vie de fourmi/uneviedefourmi/Test",
+    "last_opened_file_path": "C:/Users/elodi/OneDrive/Desktop/Projets_plateforme/LOGICIEL/C++/Vie de fourmi/uneviedefourmi/Benchmark",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -71,6 +93,7 @@
       <updated>1748436566930</updated>
       <workItem from="1748436568381" duration="149000" />
       <workItem from="1748436797452" duration="3245000" />
+      <workItem from="1748854588200" duration="1375000" />
     </task>
     <servers />
   </component>

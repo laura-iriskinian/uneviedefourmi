@@ -75,6 +75,13 @@ Sv - S1               # Tunnel entre vestibule et S1
 S1 - S2               # Tunnel entre S1 et S2
 S2 - Sd               # Tunnel entre S2 et dortoir
 ```
+## Compilation et Exécution
+
+### Compilation  
+g++ -o ants main.cpp ants.cpp
+
+### Exécution
+./ants
 
 ## Résultats et Performance
 
