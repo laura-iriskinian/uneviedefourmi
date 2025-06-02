@@ -49,11 +49,12 @@ int main(int argc, char* argv[]) {
             vector<string> pathB = findShortestPath(ants[b].position, "Sd");
 
             if (pathA.size() == pathB.size()) {
-                return a < b; // f1 before f2, etc.
+                return a < b; // if both ants at same distance, f1 before f2, etc.
             }
-            return pathA.size() < pathB.size(); // Closest first
+            return pathA.size() < pathB.size(); // Closest ant to Sd moves first
         });
 
+        // Plan next moves
         for (int antIndex : antOrder) {
             Ant& ant = ants[antIndex];
             string current = ant.position;
