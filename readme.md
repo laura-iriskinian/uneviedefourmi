@@ -81,6 +81,9 @@ S2 - Sd               # Tunnel entre S2 et dortoir
 g++ -o ants main.cpp ants.cpp
 
 ### Exécution
+./ants fourmiliere_un.txt
+
+### Ou exécution interactive
 ./ants
 
 ## Résultats et Performance
