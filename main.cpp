@@ -1,4 +1,4 @@
-#include "ants.h"
+#include "ants.hpp"
 
 // Main program loop
 int main(int argc, char* argv[]) {

@@ -1,4 +1,4 @@
-#include "ants.h"
+#include "ants.hpp"
 
 // Global variables
 ColonyInfo colonyInfo;

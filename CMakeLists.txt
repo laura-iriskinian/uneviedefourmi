@@ -17,7 +17,7 @@ include_directories(.)
 add_executable(uneviedefourmi
         main.cpp
         ants.cpp
-        ants.h
+        ants.hpp
 )
 
 # Optional: Copy test files to build directory
@@ -29,4 +29,3 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_quatre.txt DESTINATION ${CMAKE
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_cinq.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fourmiliere_3D.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/everything_everywhere.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/salle_d_at-ant.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
